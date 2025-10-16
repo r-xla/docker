@@ -17,20 +17,18 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libicu-dev \
   && rm -rf /var/lib/apt/lists/*
 
-# Configure R to use Posit Package Manager and proper UA via site profile
+# Use pppm
 COPY .Rprofile /usr/local/lib/R/etc/Rprofile.site
 
-# Install required R packages
-RUN R -q -e "install.packages(c('remotes','bench','ggplot2','torch'))"
+RUN R -q -e "install.packages('remotes')"
 
-# Install CPU libtorch for the R torch package
-RUN R -q -e "torch::install_torch()"
-
-# Install anvil (and its GitHub remote dependencies)
-RUN R -q -e "remotes::install_github('r-xla/anvil')"
+# GITHUB_PAT is NOT part of the image
+RUN --mount=type=secret,id=github_pat \
+    export GITHUB_PAT="$(cat /run/secrets/github_pat 2>/dev/null || true)" && \
+    R -q -e "remotes::install_github('r-xla/anvil')"
 
 # Trigger PJRT plugin download
-RUN R -q -e "anvil::nv_tensor(1)"
+RUN R -q -e "anvil::nv_tensor(1, platform = 'cpu')"
 
 CMD ["bash"]
 
