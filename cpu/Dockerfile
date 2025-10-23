@@ -1,4 +1,4 @@
-FROM rocker/r-ver:4.5.1
+FROM rocker/r-ver:latest
 
 ENV DEBIAN_FRONTEND=noninteractive
 
@@ -31,5 +31,3 @@ RUN --mount=type=secret,id=github_pat \
 RUN R -q -e "anvil::nv_tensor(1, platform = 'cpu')"
 
 CMD ["bash"]
-
-
