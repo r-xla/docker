@@ -38,8 +38,7 @@ RUN --mount=type=secret,id=github_pat \
     R -q -e "remotes::install_github('r-xla/anvil')"
 
 # Download PJRT plugins
-# Note: CUDA plugin download requires GPU at runtime, so we only pre-download CPU
+# Can't use nv_tensor() here because it fails if no GPU is available
 RUN R -q -e "plugin_path('cpu'); plugin_path('cuda')"
-# CUDA plugin will be downloaded on first use when GPU is available
 
 CMD ["bash"]
