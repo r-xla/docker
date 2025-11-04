@@ -1,4 +1,4 @@
-# docker
+# Docker images for anvil
 
 This repository builds daily docker images for https://github.com/r-xla/anvil for both CPU and CUDA.
 Only amd64 architecture is supported.
