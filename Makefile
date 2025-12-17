@@ -1,5 +1,6 @@
 # Build variables (override with: make cpu TAG=mytag)
 CPU_IMAGE_NAME ?= anvil-cpu
+CUDA_BASE_IMAGE_NAME ?= anvil-cuda-base
 CUDA_IMAGE_NAME ?= anvil-cuda
 TAG ?= latest
 PLATFORM ?= linux/amd64
@@ -24,6 +25,10 @@ endef
 .PHONY: cpu
 cpu:
 	$(call build_image,cpu,$(CPU_IMAGE_NAME))
+
+.PHONY: cuda-base
+cuda-base:
+	$(call build_image,cuda-base,$(CUDA_BASE_IMAGE_NAME))
 
 .PHONY: cuda
 cuda:
