@@ -35,13 +35,16 @@ RUN apt-get update -y && apt-get install -y \
   && rm -rf /var/lib/apt/lists/*
 
 # -------- install nvshmem --------
+# Clean up intermediate files progressively to avoid running out of disk space
 RUN cd /tmp \
   && wget https://developer.download.nvidia.com/compute/nvshmem/3.2.5/local_installers/nvshmem-local-repo-ubuntu2404-3.2.5_3.2.5-1_amd64.deb \
   && dpkg -i nvshmem-local-repo-ubuntu2404-3.2.5_3.2.5-1_amd64.deb \
+  && rm -f /tmp/*.deb \
   && cp /var/nvshmem-local-repo-ubuntu2404-3.2.5/nvshmem-*-keyring.gpg /usr/share/keyrings/ \
   && apt-get update \
   && apt-get -y --allow-change-held-packages install nvshmem-cuda-12 libnccl2 libnccl-dev \
-  && rm -rf /var/lib/apt/lists/* /tmp/*.deb
+  && rm -rf /var/nvshmem-local-repo-ubuntu2404-3.2.5 \
+  && rm -rf /var/lib/apt/lists/* /var/cache/apt/archives/*
 
 # -------- install R using rig ----------------------------------
 RUN curl -Ls https://github.com/r-lib/rig/releases/download/latest/rig-linux-latest.tar.gz | \
