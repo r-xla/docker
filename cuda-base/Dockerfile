@@ -29,6 +29,7 @@ RUN apt-get update -y && apt-get install -y \
     libpng-dev \
     locales \
     wget \
+    qpdf \
   && locale-gen en_US.UTF-8 \
   && update-locale LANG=en_US.UTF-8 \
   && rm -rf /var/lib/apt/lists/*
