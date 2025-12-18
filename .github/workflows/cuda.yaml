@@ -1,32 +1,33 @@
 name: Build and Push CUDA Docker Image
 
 on:
-  schedule:
-    # Run daily at 2 AM UTC
-    - cron: '0 2 * * *'
   workflow_dispatch: # Allow manual triggering
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
+  workflow_run:
+    workflows: ["Build and Push CUDA Base Docker Image"]
+    types:
+      - completed
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    # Only run if triggered manually or if cuda-base succeeded
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
     permissions:
       contents: read
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          # For workflow_run, checkout the same ref that triggered cuda-base
+          ref: ${{ github.event.workflow_run.head_branch || github.ref }}
 
       - name: Build and push Docker image
         uses: ./.github/actions/docker-build
         with:
           image_name: sebffischer/anvil-cuda
           dockerfile: ./cuda/Dockerfile
-          push: ${{ github.event_name != 'pull_request' }}
+          # Push only if cuda-base pushed (not a PR) or manual trigger on main
+          push: ${{ (github.event.workflow_run.event != 'pull_request' && github.event_name == 'workflow_run') || (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main') }}
           dockerhub_username: ${{ secrets.DOCKERHUB_USERNAME }}
           dockerhub_token: ${{ secrets.DOCKERHUB_TOKEN }}
