@@ -20,22 +20,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
   && rm -rf /var/lib/apt/lists/*
 
 # -------- additional system packages --------
-RUN apt-get update -y && apt-get install -y \
-    sudo \
-    software-properties-common \
-    dialog \
-    apt-utils \
-    tzdata \
-    libpng-dev \
-    locales \
-    wget \
-    qpdf \
+RUN apt-get update -y \
+  && apt-get install -y sudo software-properties-common dialog apt-utils tzdata libpng-dev locales pkg-config wget qpdf \
   && locale-gen en_US.UTF-8 \
   && update-locale LANG=en_US.UTF-8 \
   && rm -rf /var/lib/apt/lists/*
 
 # -------- install nvshmem --------
-# Clean up intermediate files progressively to avoid running out of disk space
 RUN cd /tmp \
   && wget https://developer.download.nvidia.com/compute/nvshmem/3.2.5/local_installers/nvshmem-local-repo-ubuntu2404-3.2.5_3.2.5-1_amd64.deb \
   && dpkg -i nvshmem-local-repo-ubuntu2404-3.2.5_3.2.5-1_amd64.deb \
