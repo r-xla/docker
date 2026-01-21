@@ -38,7 +38,7 @@ RUN cd /tmp \
   && rm -rf /var/lib/apt/lists/* /var/cache/apt/archives/*
 
 # -------- install R using rig ----------------------------------
-RUN curl -Ls https://github.com/r-lib/rig/releases/download/v0.7.0/rig-linux-v0.7.0.tar.gz | \
+RUN curl -Ls https://github.com/r-lib/rig/releases/download/latest/rig-linux-latest.tar.gz | \
     tar xz -C /usr/local && \
     rig add 4.4.2 && \
     rig default 4.4.2
