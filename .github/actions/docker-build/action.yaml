@@ -18,6 +18,10 @@ inputs:
   dockerhub_token:
     description: 'Docker Hub token'
     required: false
+  no_cache:
+    description: 'Disable cache for this build'
+    required: false
+    default: 'false'
 
 runs:
   using: 'composite'
@@ -51,5 +55,6 @@ runs:
         labels: ${{ steps.meta.outputs.labels }}
         build-args: |
           BUILDKIT_INLINE_CACHE=1
-        cache-from: type=registry,ref=docker.io/${{ inputs.image_name }}:buildcache
+        no-cache: ${{ inputs.no_cache == 'true' }}
+        cache-from: ${{ inputs.no_cache != 'true' && format('type=registry,ref=docker.io/{0}:buildcache', inputs.image_name) || '' }}
         cache-to: ${{ inputs.push == 'true' && format('type=registry,ref=docker.io/{0}:buildcache,image-manifest=true', inputs.image_name) || '' }}

@@ -30,3 +30,4 @@ jobs:
           push: ${{ github.event_name != 'pull_request' }}
           dockerhub_username: ${{ secrets.DOCKERHUB_USERNAME }}
           dockerhub_token: ${{ secrets.DOCKERHUB_TOKEN }}
+          no_cache: 'true'  # TODO: remove after cache is refreshed
