@@ -35,6 +35,7 @@ RUN cd /tmp \
   && apt-get update \
   && apt-get -y --allow-change-held-packages install nvshmem-cuda-12=3.4.5-1 libnccl2 libnccl-dev libnvshmem3-cuda-12=3.4.5-1 libnvshmem3-static-cuda-12=3.4.5-1 libnvshmem3-dev-cuda-12=3.4.5-1 \
   && rm -rf /var/nvshmem-local-repo-ubuntu2404-3.2.5 \
+  && rm -f /etc/apt/sources.list.d/nvshmem-local-repo-ubuntu2404-3.2.5.list \
   && rm -rf /var/lib/apt/lists/* /var/cache/apt/archives/*
 
 # -------- install R using rig ----------------------------------
