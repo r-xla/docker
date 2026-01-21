@@ -33,15 +33,15 @@ RUN cd /tmp \
   && rm -f /tmp/*.deb \
   && cp /var/nvshmem-local-repo-ubuntu2404-3.2.5/nvshmem-*-keyring.gpg /usr/share/keyrings/ \
   && apt-get update \
-  && apt-get -y --allow-change-held-packages install nvshmem-cuda-12 libnccl2 libnccl-dev \
+  && apt-get -y --allow-change-held-packages install nvshmem-cuda-12=3.4.5-1 libnccl2 libnccl-dev libnvshmem3-cuda-12=3.4.5-1 libnvshmem3-static-cuda-12=3.4.5-1 libnvshmem3-dev-cuda-12=3.4.5-1 \
   && rm -rf /var/nvshmem-local-repo-ubuntu2404-3.2.5 \
   && rm -rf /var/lib/apt/lists/* /var/cache/apt/archives/*
 
 # -------- install R using rig ----------------------------------
-RUN curl -Ls https://github.com/r-lib/rig/releases/download/latest/rig-linux-latest.tar.gz | \
+RUN curl -Ls https://github.com/r-lib/rig/releases/download/v0.7.0/rig-linux-v0.7.0.tar.gz | \
     tar xz -C /usr/local && \
-    rig add 4.5.0 && \
-    rig default 4.5.0
+    rig add 4.4.2 && \
+    rig default 4.4.2
 
 RUN Rscript -e "print(sessionInfo());"
 
