@@ -1,0 +1,60 @@
+name: 'Docker Build and Push'
+description: 'Build and optionally push a Docker image to Docker Hub'
+
+inputs:
+  image_name:
+    description: 'Docker image name (e.g., sebffischer/anvil-cuda)'
+    required: true
+  dockerfile:
+    description: 'Path to the Dockerfile'
+    required: true
+  push:
+    description: 'Whether to push the image to Docker Hub'
+    required: true
+    default: 'false'
+  dockerhub_username:
+    description: 'Docker Hub username'
+    required: false
+  dockerhub_token:
+    description: 'Docker Hub token'
+    required: false
+  no_cache:
+    description: 'Disable cache for this build'
+    required: false
+    default: 'false'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Log in to Docker Hub
+      if: inputs.push == 'true'
+      uses: docker/login-action@v3
+      with:
+        registry: docker.io
+        username: ${{ inputs.dockerhub_username }}
+        password: ${{ inputs.dockerhub_token }}
+
+    - name: Extract metadata
+      id: meta
+      uses: docker/metadata-action@v5
+      with:
+        images: docker.io/${{ inputs.image_name }}
+        tags: |
+          type=raw,value=latest
+
+    - name: Build and push Docker image
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        file: ${{ inputs.dockerfile }}
+        push: ${{ inputs.push }}
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
+        build-args: |
+          BUILDKIT_INLINE_CACHE=1
+        no-cache: ${{ inputs.no_cache == 'true' }}
+        cache-from: ${{ inputs.no_cache != 'true' && format('type=registry,ref=docker.io/{0}:buildcache', inputs.image_name) || '' }}
+        cache-to: ${{ inputs.push == 'true' && format('type=registry,ref=docker.io/{0}:buildcache,image-manifest=true', inputs.image_name) || '' }}

@@ -1,4 +1,4 @@
-name: Build and Push CPU Docker Image
+name: Build and Push CUDA Base Docker Image
 
 on:
   schedule:
@@ -25,8 +25,18 @@ jobs:
       - name: Build and push Docker image
         uses: ./.github/actions/docker-build
         with:
-          image_name: sebffischer/anvil-cpu
-          dockerfile: ./cpu/Dockerfile
+          image_name: sebffischer/anvil-cuda-base
+          dockerfile: ./cuda-base/Dockerfile
           push: ${{ github.event_name != 'pull_request' }}
           dockerhub_username: ${{ secrets.DOCKERHUB_USERNAME }}
           dockerhub_token: ${{ secrets.DOCKERHUB_TOKEN }}
+          no_cache: 'true'  # TODO: remove after cache is refreshed
+
+  build-cuda:
+    needs: build
+    uses: ./.github/workflows/cuda.yaml
+    with:
+      push: ${{ github.event_name != 'pull_request' }}
+    secrets:
+      DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+      DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
