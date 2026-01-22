@@ -3,6 +3,10 @@ FROM sebffischer/anvil-cuda-base:latest
 
 # -------- install R packages---------------------------
 RUN R -q -e "install.packages('remotes', force = TRUE)"
+
+# Cache bust to always reinstall anvil
+ARG CACHEBUST=1
+
 # GITHUB_PAT is NOT part of the image
 RUN --mount=type=secret,id=github_pat \
     export GITHUB_PAT="$(cat /run/secrets/github_pat 2>/dev/null || true)" && \

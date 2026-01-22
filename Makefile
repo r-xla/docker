@@ -2,6 +2,7 @@
 CPU_IMAGE_NAME ?= anvil-cpu
 CUDA_BASE_IMAGE_NAME ?= anvil-cuda-base
 CUDA_IMAGE_NAME ?= anvil-cuda
+BENCH_CPU_IMAGE_NAME ?= anvil-bench-cpu
 TAG ?= latest
 PLATFORM ?= linux/amd64
 PROGRESS ?= plain
@@ -33,3 +34,7 @@ cuda-base:
 .PHONY: cuda
 cuda:
 	$(call build_image,cuda,$(CUDA_IMAGE_NAME))
+
+.PHONY: bench-cpu
+bench-cpu:
+	$(call build_image,bench-cpu,$(BENCH_CPU_IMAGE_NAME))
