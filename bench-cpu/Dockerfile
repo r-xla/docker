@@ -7,7 +7,7 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 
 # Use pppm
-COPY envs/.Rprofile /usr/local/lib/R/etc/Rprofile.site
+COPY .Rprofile /usr/local/lib/R/etc/Rprofile.site
 
 
 # Otherwise wrong libicui
