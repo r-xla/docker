@@ -20,12 +20,15 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # Use pppm
 COPY .Rprofile /usr/local/lib/R/etc/Rprofile.site
 
-RUN R -q -e "install.packages('remotes')"
+RUN R -q -e "install.packages('remotes', force = TRUE)"
+
+# Cache bust to always reinstall anvil
+ARG CACHEBUST=1
 
 # GITHUB_PAT is NOT part of the image
 RUN --mount=type=secret,id=github_pat \
     export GITHUB_PAT="$(cat /run/secrets/github_pat 2>/dev/null || true)" && \
-    R -q -e "remotes::install_github('r-xla/anvil')"
+    R -q -e "remotes::install_github('r-xla/anvil', force = TRUE)"
 
 # Trigger PJRT plugin download
 RUN R -q -e "anvil::nv_tensor(1, device = 'cpu')"

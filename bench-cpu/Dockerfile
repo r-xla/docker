@@ -11,9 +11,9 @@ COPY .Rprofile /usr/local/lib/R/etc/Rprofile.site
 
 
 # Otherwise wrong libicui
-RUN Rscript --vanilla -e 'options(repos = c(CRAN = "https://cloud.r-project.org")); install.packages("stringi")'
+RUN Rscript --vanilla -e 'options(repos = c(CRAN = "https://cloud.r-project.org")); install.packages("stringi", force = TRUE)'
 
-RUN R -q -e "install.packages(c('torch', 'data.table', 'batchtools', 'mirai', 'bench', 'here'))"
+RUN R -q -e "install.packages(c('torch', 'data.table', 'batchtools', 'mirai', 'bench', 'here'), force = TRUE)"
 
 # Install CPU libtorch binaries for R torch
 RUN R -q -e "torch::install_torch()"

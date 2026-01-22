@@ -55,6 +55,7 @@ runs:
         labels: ${{ steps.meta.outputs.labels }}
         build-args: |
           BUILDKIT_INLINE_CACHE=1
+          CACHEBUST=${{ github.run_id }}
         no-cache: ${{ inputs.no_cache == 'true' }}
         cache-from: ${{ inputs.no_cache != 'true' && format('type=registry,ref=docker.io/{0}:buildcache', inputs.image_name) || '' }}
         cache-to: ${{ inputs.push == 'true' && format('type=registry,ref=docker.io/{0}:buildcache,image-manifest=true', inputs.image_name) || '' }}
