@@ -1,16 +1,18 @@
 name: Build and Push CUDA Bench Docker Image
 
 on:
-  schedule:
-    # Run daily at 2 AM UTC
-    - cron: '0 2 * * *'
   workflow_dispatch: # Allow manual triggering
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
+  workflow_call: # Allow being called from cuda-base.yaml
+    inputs:
+      push:
+        description: 'Whether to push the image'
+        type: boolean
+        default: false
+    secrets:
+      DOCKERHUB_USERNAME:
+        required: true
+      DOCKERHUB_TOKEN:
+        required: true
 
 jobs:
   build:
@@ -27,6 +29,7 @@ jobs:
         with:
           image_name: sebffischer/anvil-cuda-bench
           dockerfile: ./cuda-bench/Dockerfile
-          push: ${{ github.event_name != 'pull_request' }}
+          # Push if called with push=true, or manual trigger on main
+          push: ${{ inputs.push || (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main') }}
           dockerhub_username: ${{ secrets.DOCKERHUB_USERNAME }}
           dockerhub_token: ${{ secrets.DOCKERHUB_TOKEN }}
