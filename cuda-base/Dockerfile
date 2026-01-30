@@ -1,5 +1,5 @@
 # -------- CUDA-capable base image --------
-FROM nvidia/cuda:12.8.1-cudnn-devel-ubuntu24.04
+FROM nvidia/cuda:12.6.3-cudnn-devel-ubuntu20.04
 
 ENV DEBIAN_FRONTEND=noninteractive
 
@@ -28,13 +28,13 @@ RUN apt-get update -y \
 
 # -------- install nvshmem --------
 RUN cd /tmp \
-  && wget https://developer.download.nvidia.com/compute/nvshmem/3.2.5/local_installers/nvshmem-local-repo-ubuntu2404-3.2.5_3.2.5-1_amd64.deb \
-  && dpkg -i nvshmem-local-repo-ubuntu2404-3.2.5_3.2.5-1_amd64.deb \
+  && wget https://developer.download.nvidia.com/compute/nvshmem/3.2.5/local_installers/nvshmem-local-repo-ubuntu2004-3.2.5_3.2.5-1_amd64.deb \
+  && dpkg -i nvshmem-local-repo-ubuntu2004-3.2.5_3.2.5-1_amd64.deb \
   && rm -f /tmp/*.deb \
-  && cp /var/nvshmem-local-repo-ubuntu2404-3.2.5/nvshmem-*-keyring.gpg /usr/share/keyrings/ \
+  && cp /var/nvshmem-local-repo-ubuntu2004-3.2.5/nvshmem-*-keyring.gpg /usr/share/keyrings/ \
   && apt-get update \
   && apt-get -y --allow-change-held-packages install nvshmem-cuda-12=3.4.5-1 libnccl2 libnccl-dev libnvshmem3-cuda-12=3.4.5-1 libnvshmem3-static-cuda-12=3.4.5-1 libnvshmem3-dev-cuda-12=3.4.5-1 \
-  && rm -rf /var/nvshmem-local-repo-ubuntu2404-3.2.5 \
+  && rm -rf /var/nvshmem-local-repo-ubuntu2004-3.2.5 \
   && rm -f /etc/apt/sources.list.d/*nvshmem* \
   && rm -rf /var/lib/apt/lists/* /var/cache/apt/archives/* \
   && apt-get update && rm -rf /var/lib/apt/lists/*
