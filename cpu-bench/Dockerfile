@@ -12,6 +12,9 @@ RUN apt-get update \
 RUN pip3 install --no-cache-dir --break-system-packages \
     torch --index-url https://download.pytorch.org/whl/cpu
 
+# Install JAX with CPU support
+RUN pip3 install --no-cache-dir --break-system-packages jax[cpu] flax optax
+
 # Use pppm
 COPY .Rprofile /usr/local/lib/R/etc/Rprofile.site
 
