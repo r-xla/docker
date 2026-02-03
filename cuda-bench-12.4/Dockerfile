@@ -43,8 +43,8 @@ RUN cd /tmp \
 # -------- install R using rig --------
 RUN curl -Ls https://github.com/r-lib/rig/releases/download/latest/rig-linux-latest.tar.gz | \
     tar xz -C /usr/local && \
-    rig add 4.4.2 && \
-    rig default 4.4.2
+    rig add 4.5 && \
+    rig default 4.5
 
 RUN Rscript -e "print(sessionInfo());"
 
