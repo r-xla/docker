@@ -57,6 +57,8 @@ RUN R -q -e "install.packages('remotes', force = TRUE)"
 # Cache bust to always reinstall anvil
 ARG CACHEBUST=1
 
+RUN R -q -e "install.packages('backports', type = 'source')"
+
 ARG GITHUB_PAT=""
 RUN GITHUB_PAT="${GITHUB_PAT}" \
     R -q -e "remotes::install_github('r-xla/anvil', force = TRUE)"
