@@ -4,6 +4,7 @@ CUDA_BASE_IMAGE_NAME ?= anvil-cuda-base
 CUDA_IMAGE_NAME ?= anvil-cuda
 CPU_BENCH_IMAGE_NAME ?= anvil-cpu-bench
 CUDA_BENCH_IMAGE_NAME ?= anvil-cuda-bench
+CUDA_BENCH_12_4_IMAGE_NAME ?= anvil-cuda-bench-12.4
 TAG ?= latest
 PLATFORM ?= linux/amd64
 PROGRESS ?= plain
@@ -43,3 +44,7 @@ cpu-bench:
 .PHONY: cuda-bench
 cuda-bench:
 	$(call build_image,cuda-bench,$(CUDA_BENCH_IMAGE_NAME))
+
+.PHONY: cuda-bench-12.4
+cuda-bench-12.4:
+	$(call build_image,cuda-bench-12.4,$(CUDA_BENCH_12_4_IMAGE_NAME))
