@@ -63,7 +63,7 @@ RUN GITHUB_PAT="${GITHUB_PAT}" \
 
 # Download PJRT plugins
 # Can't use nv_tensor() here because it fails if no GPU is available
-RUN R -q -e "pjrt:::plugin_path('cpu'); pjrt:::plugin_path('cuda')"
+RUN R -q -e "options(timeout = 600); pjrt:::plugin_path('cpu'); pjrt:::plugin_path('cuda')"
 
 # -------- bench extras (from cuda-bench) --------
 RUN apt-get update \
