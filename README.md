@@ -15,17 +15,20 @@ These images are built daily and pushed to Docker Hub and [GitHub Container Regi
 
 All images come with R installed.
 
+Each image is available with two tags:
+
+| Tag | Description |
+|-----|-------------|
+| `:latest` | Built from the anvil `main` branch (rebuilt daily and on push) |
+| `:release` | Built from the latest anvil release (rebuilt when a new release is published) |
+
 ```bash
 # From Docker Hub
 docker pull sebffischer/<image-name>:latest
+docker pull sebffischer/<image-name>:release
 # From GitHub Container Registry
 docker pull ghcr.io/r-xla/<image-name>:latest
-```
-
-To pull an image for a specific anvil release, use the version tag:
-
-```bash
-docker pull ghcr.io/r-xla/<image-name>:v0.1.0
+docker pull ghcr.io/r-xla/<image-name>:release
 ```
 
 ## Additional Dockerfiles
