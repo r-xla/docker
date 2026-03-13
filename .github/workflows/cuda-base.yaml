@@ -1,4 +1,4 @@
-name: Build and Push CUDA Base Docker Image
+name: Build and Push CUDA Docker Images
 
 on:
   schedule:
@@ -8,25 +8,51 @@ on:
   push:
     branches:
       - main
-    tags:
-      - 'v*'
   pull_request:
     branches:
       - main
 
 jobs:
-  build:
+  resolve-anvil-release:
+    runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.get-tag.outputs.tag }}
+      changed: ${{ steps.set-changed.outputs.changed }}
+    steps:
+      - name: Get latest anvil release tag
+        id: get-tag
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          tag=$(gh api repos/r-xla/anvil/releases/latest --jq '.tag_name')
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          echo "Latest anvil release: $tag"
+      - name: Check if release changed
+        id: check-cache
+        uses: actions/cache@v4
+        with:
+          path: /tmp/anvil-release-tag-cuda
+          key: anvil-release-cuda-${{ steps.get-tag.outputs.tag }}
+      - name: Set changed output
+        id: set-changed
+        run: |
+          if [ "${{ steps.check-cache.outputs.cache-hit }}" == "true" ]; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+            mkdir -p /tmp/anvil-release-tag-cuda
+            echo "${{ steps.get-tag.outputs.tag }}" > /tmp/anvil-release-tag-cuda/tag
+          fi
+
+  # -- :latest builds (anvil main) --
+  build-cuda-base-latest:
     runs-on: ubuntu-latest
     permissions:
       contents: read
       packages: write
-
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Build and push Docker image
-        uses: ./.github/actions/docker-build
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/docker-build
         with:
           image_name: sebffischer/anvil-cuda-base
           dockerfile: ./cuda-base/Dockerfile
@@ -34,15 +60,53 @@ jobs:
           dockerhub_username: ${{ secrets.DOCKERHUB_USERNAME }}
           dockerhub_token: ${{ secrets.DOCKERHUB_TOKEN }}
           ghcr_token: ${{ secrets.GITHUB_TOKEN }}
-          no_cache: 'true'  # TODO: remove after cache is refreshed
+          no_cache: 'true'
+          extra_tags: |
+            docker.io/sebffischer/anvil-cuda-base:latest
+            ghcr.io/${{ github.repository_owner }}/anvil-cuda-base:latest
 
-  build-cuda:
-    needs: build
+  build-cuda-latest:
+    needs: build-cuda-base-latest
     uses: ./.github/workflows/cuda.yaml
     with:
       push: ${{ github.event_name != 'pull_request' }}
-      anvil_ref: ${{ github.ref_type == 'tag' && github.ref_name || '' }}
+      anvil_ref: ''
+      tag: latest
     secrets:
       DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
       DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
 
+  # -- :release builds (latest anvil release, only when release changed) --
+  build-cuda-base-release:
+    needs: resolve-anvil-release
+    if: needs.resolve-anvil-release.outputs.changed == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/docker-build
+        with:
+          image_name: sebffischer/anvil-cuda-base
+          dockerfile: ./cuda-base/Dockerfile
+          push: ${{ github.event_name != 'pull_request' }}
+          dockerhub_username: ${{ secrets.DOCKERHUB_USERNAME }}
+          dockerhub_token: ${{ secrets.DOCKERHUB_TOKEN }}
+          ghcr_token: ${{ secrets.GITHUB_TOKEN }}
+          no_cache: 'true'
+          extra_tags: |
+            docker.io/sebffischer/anvil-cuda-base:release
+            ghcr.io/${{ github.repository_owner }}/anvil-cuda-base:release
+
+  build-cuda-release:
+    needs: [resolve-anvil-release, build-cuda-base-release]
+    if: needs.resolve-anvil-release.outputs.changed == 'true'
+    uses: ./.github/workflows/cuda.yaml
+    with:
+      push: ${{ github.event_name != 'pull_request' }}
+      anvil_ref: ${{ needs.resolve-anvil-release.outputs.tag }}
+      tag: release
+    secrets:
+      DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+      DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}

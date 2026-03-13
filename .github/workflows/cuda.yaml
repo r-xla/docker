@@ -12,6 +12,10 @@ on:
         description: 'Git ref for r-xla/anvil to install'
         type: string
         default: ''
+      tag:
+        description: 'Image tag (e.g., latest, release)'
+        type: string
+        default: 'latest'
     secrets:
       DOCKERHUB_USERNAME:
         required: true
@@ -34,9 +38,11 @@ jobs:
         with:
           image_name: sebffischer/anvil-cuda
           dockerfile: ./cuda/Dockerfile
-          # Push if called with push=true, or manual trigger on main
           push: ${{ inputs.push || (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main') }}
           dockerhub_username: ${{ secrets.DOCKERHUB_USERNAME }}
           dockerhub_token: ${{ secrets.DOCKERHUB_TOKEN }}
           ghcr_token: ${{ secrets.GITHUB_TOKEN }}
-          anvil_ref: ${{ inputs.anvil_ref || (github.ref_type == 'tag' && github.ref_name || '') }}
+          anvil_ref: ${{ inputs.anvil_ref }}
+          extra_tags: |
+            docker.io/sebffischer/anvil-cuda:${{ inputs.tag || 'latest' }}
+            ghcr.io/${{ github.repository_owner }}/anvil-cuda:${{ inputs.tag || 'latest' }}

@@ -8,25 +8,50 @@ on:
   push:
     branches:
       - main
-    tags:
-      - 'v*'
   pull_request:
     branches:
       - main
 
 jobs:
-  build:
+  resolve-anvil-release:
+    runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.get-tag.outputs.tag }}
+      changed: ${{ steps.set-changed.outputs.changed }}
+    steps:
+      - name: Get latest anvil release tag
+        id: get-tag
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          tag=$(gh api repos/r-xla/anvil/releases/latest --jq '.tag_name')
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          echo "Latest anvil release: $tag"
+      - name: Check if release changed
+        id: check-cache
+        uses: actions/cache@v4
+        with:
+          path: /tmp/anvil-release-tag-cpu
+          key: anvil-release-cpu-${{ steps.get-tag.outputs.tag }}
+      - name: Set changed output
+        id: set-changed
+        run: |
+          if [ "${{ steps.check-cache.outputs.cache-hit }}" == "true" ]; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+            mkdir -p /tmp/anvil-release-tag-cpu
+            echo "${{ steps.get-tag.outputs.tag }}" > /tmp/anvil-release-tag-cpu/tag
+          fi
+
+  build-latest:
     runs-on: ubuntu-latest
     permissions:
       contents: read
       packages: write
-
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Build and push Docker image
-        uses: ./.github/actions/docker-build
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/docker-build
         with:
           image_name: sebffischer/anvil-cpu
           dockerfile: ./cpu/Dockerfile
@@ -34,4 +59,28 @@ jobs:
           dockerhub_username: ${{ secrets.DOCKERHUB_USERNAME }}
           dockerhub_token: ${{ secrets.DOCKERHUB_TOKEN }}
           ghcr_token: ${{ secrets.GITHUB_TOKEN }}
-          anvil_ref: ${{ github.ref_type == 'tag' && github.ref_name || '' }}
+          extra_tags: |
+            docker.io/sebffischer/anvil-cpu:latest
+            ghcr.io/${{ github.repository_owner }}/anvil-cpu:latest
+
+  build-release:
+    needs: resolve-anvil-release
+    if: needs.resolve-anvil-release.outputs.changed == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/docker-build
+        with:
+          image_name: sebffischer/anvil-cpu
+          dockerfile: ./cpu/Dockerfile
+          push: ${{ github.event_name != 'pull_request' }}
+          dockerhub_username: ${{ secrets.DOCKERHUB_USERNAME }}
+          dockerhub_token: ${{ secrets.DOCKERHUB_TOKEN }}
+          ghcr_token: ${{ secrets.GITHUB_TOKEN }}
+          anvil_ref: ${{ needs.resolve-anvil-release.outputs.tag }}
+          extra_tags: |
+            docker.io/sebffischer/anvil-cpu:release
+            ghcr.io/${{ github.repository_owner }}/anvil-cpu:release
