@@ -5,7 +5,7 @@ Only amd64/x86-64 architecture is supported.
 
 ## Prebuilt Images
 
-These images are built daily and pushed to Docker Hub.
+These images are built daily and pushed to Docker Hub and [GitHub Container Registry](https://github.com/orgs/r-xla/packages).
 
 | Image | Description |
 |-------|-------------|
@@ -16,7 +16,16 @@ These images are built daily and pushed to Docker Hub.
 All images come with R installed.
 
 ```bash
+# From Docker Hub
 docker pull sebffischer/<image-name>:latest
+# From GitHub Container Registry
+docker pull ghcr.io/r-xla/<image-name>:latest
+```
+
+To pull an image for a specific anvil release, use the version tag:
+
+```bash
+docker pull ghcr.io/r-xla/<image-name>:v0.1.0
 ```
 
 ## Additional Dockerfiles

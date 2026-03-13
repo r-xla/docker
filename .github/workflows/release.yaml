@@ -3,9 +3,14 @@ name: Release Docker Images
 on:
   repository_dispatch:
     types: [anvil-release]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Anvil release version (e.g. v0.1.0)'
+        required: true
 
 env:
-  ANVIL_TAG: ${{ github.event.client_payload.tag }}
+  ANVIL_TAG: ${{ github.event.client_payload.tag || inputs.tag }}
 
 jobs:
   tag:
