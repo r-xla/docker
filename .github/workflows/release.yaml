@@ -1,0 +1,85 @@
+name: Release Docker Images
+
+on:
+  repository_dispatch:
+    types: [anvil-release]
+
+env:
+  ANVIL_TAG: ${{ github.event.client_payload.tag }}
+
+jobs:
+  tag:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Create and push tag
+        run: |
+          git tag "$ANVIL_TAG"
+          git push origin "$ANVIL_TAG"
+
+  build-cpu:
+    needs: tag
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.ANVIL_TAG }}
+      - uses: ./.github/actions/docker-build
+        with:
+          image_name: sebffischer/anvil-cpu
+          dockerfile: ./cpu/Dockerfile
+          push: true
+          dockerhub_username: ${{ secrets.DOCKERHUB_USERNAME }}
+          dockerhub_token: ${{ secrets.DOCKERHUB_TOKEN }}
+          ghcr_token: ${{ secrets.GITHUB_TOKEN }}
+          anvil_ref: ${{ env.ANVIL_TAG }}
+
+  build-cuda-base:
+    needs: tag
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.ANVIL_TAG }}
+      - uses: ./.github/actions/docker-build
+        with:
+          image_name: sebffischer/anvil-cuda-base
+          dockerfile: ./cuda-base/Dockerfile
+          push: true
+          dockerhub_username: ${{ secrets.DOCKERHUB_USERNAME }}
+          dockerhub_token: ${{ secrets.DOCKERHUB_TOKEN }}
+          ghcr_token: ${{ secrets.GITHUB_TOKEN }}
+          no_cache: 'true'
+
+  build-cuda:
+    needs: build-cuda-base
+    uses: ./.github/workflows/cuda.yaml
+    with:
+      push: true
+      anvil_ref: ${{ github.event.client_payload.tag }}
+    secrets:
+      DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+      DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+
+  create-release:
+    needs: [build-cpu, build-cuda]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Create GitHub release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create "$ANVIL_TAG" \
+            --title "Docker images for anvil $ANVIL_TAG" \
+            --notes "Built from [r-xla/anvil $ANVIL_TAG](https://github.com/r-xla/anvil/releases/tag/$ANVIL_TAG)"

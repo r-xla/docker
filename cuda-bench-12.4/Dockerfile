@@ -56,10 +56,11 @@ RUN R -q -e "install.packages('remotes', force = TRUE)"
 
 # Cache bust to always reinstall anvil
 ARG CACHEBUST=1
+ARG ANVIL_REF=""
 
 ARG GITHUB_PAT=""
-RUN GITHUB_PAT="${GITHUB_PAT}" \
-    R -q -e "remotes::install_github('r-xla/anvil', force = TRUE)"
+RUN GITHUB_PAT="${GITHUB_PAT}" ANVIL_REF="${ANVIL_REF:-HEAD}" \
+    R -q -e "remotes::install_github('r-xla/anvil', ref = Sys.getenv('ANVIL_REF'), force = TRUE)"
 
 # Download PJRT plugins
 # Can't use nv_tensor() here because it fails if no GPU is available

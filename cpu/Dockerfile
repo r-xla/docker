@@ -24,11 +24,13 @@ RUN R -q -e "install.packages('remotes', force = TRUE)"
 
 # Cache bust to always reinstall anvil
 ARG CACHEBUST=1
+ARG ANVIL_REF=""
 
 # GITHUB_PAT is NOT part of the image
 RUN --mount=type=secret,id=github_pat \
     export GITHUB_PAT="$(cat /run/secrets/github_pat 2>/dev/null || true)" && \
-    R -q -e "remotes::install_github('r-xla/anvil', force = TRUE)"
+    ANVIL_REF="${ANVIL_REF:-HEAD}" \
+    R -q -e "remotes::install_github('r-xla/anvil', ref = Sys.getenv('ANVIL_REF'), force = TRUE)"
 
 # Trigger PJRT plugin download
 RUN R -q -e "anvil::nv_tensor(1, device = 'cpu')"

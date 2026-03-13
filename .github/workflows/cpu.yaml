@@ -8,6 +8,8 @@ on:
   push:
     branches:
       - main
+    tags:
+      - 'v*'
   pull_request:
     branches:
       - main
@@ -17,6 +19,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+      packages: write
 
     steps:
       - name: Checkout repository
@@ -30,3 +33,5 @@ jobs:
           push: ${{ github.event_name != 'pull_request' }}
           dockerhub_username: ${{ secrets.DOCKERHUB_USERNAME }}
           dockerhub_token: ${{ secrets.DOCKERHUB_TOKEN }}
+          ghcr_token: ${{ secrets.GITHUB_TOKEN }}
+          anvil_ref: ${{ github.ref_type == 'tag' && github.ref_name || '' }}
