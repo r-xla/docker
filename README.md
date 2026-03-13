@@ -5,7 +5,7 @@ Only amd64/x86-64 architecture is supported.
 
 ## Prebuilt Images
 
-These images are built daily and pushed to Docker Hub and [GitHub Container Registry](https://github.com/orgs/r-xla/packages).
+These images are built daily and pushed to [Docker Hub](https://hub.docker.com/u/sebffischer) and [GitHub Container Registry](https://github.com/orgs/r-xla/packages).
 
 | Image | Description |
 |-------|-------------|
