@@ -59,6 +59,7 @@ jobs:
           dockerhub_username: ${{ secrets.DOCKERHUB_USERNAME }}
           dockerhub_token: ${{ secrets.DOCKERHUB_TOKEN }}
           ghcr_token: ${{ secrets.GITHUB_TOKEN }}
+          github_pat: ${{ secrets.GITHUB_TOKEN }}
           extra_tags: |
             docker.io/sebffischer/anvil-cpu:latest
             ghcr.io/${{ github.repository_owner }}/anvil-cpu:latest
@@ -80,6 +81,7 @@ jobs:
           dockerhub_username: ${{ secrets.DOCKERHUB_USERNAME }}
           dockerhub_token: ${{ secrets.DOCKERHUB_TOKEN }}
           ghcr_token: ${{ secrets.GITHUB_TOKEN }}
+          github_pat: ${{ secrets.GITHUB_TOKEN }}
           anvil_ref: ${{ needs.resolve-anvil-release.outputs.tag }}
           extra_tags: |
             docker.io/sebffischer/anvil-cpu:release

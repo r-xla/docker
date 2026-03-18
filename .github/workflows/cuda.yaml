@@ -42,6 +42,7 @@ jobs:
           dockerhub_username: ${{ secrets.DOCKERHUB_USERNAME }}
           dockerhub_token: ${{ secrets.DOCKERHUB_TOKEN }}
           ghcr_token: ${{ secrets.GITHUB_TOKEN }}
+          github_pat: ${{ secrets.GITHUB_TOKEN }}
           anvil_ref: ${{ inputs.anvil_ref }}
           extra_tags: |
             docker.io/sebffischer/anvil-cuda:${{ inputs.tag || 'latest' }}

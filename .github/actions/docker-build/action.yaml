@@ -33,6 +33,10 @@ inputs:
     description: 'Override tags (one per line). When set, the metadata-action tags are ignored.'
     required: false
     default: ''
+  github_pat:
+    description: 'GitHub token passed as a Docker build secret for private repo access'
+    required: false
+    default: ''
 
 runs:
   using: 'composite'
@@ -99,6 +103,7 @@ runs:
           BUILDKIT_INLINE_CACHE=1
           CACHEBUST=${{ github.run_id }}
           ANVIL_REF=${{ inputs.anvil_ref }}
+        secrets: ${{ inputs.github_pat != '' && format('github_pat={0}', inputs.github_pat) || '' }}
         no-cache: ${{ inputs.no_cache == 'true' }}
         cache-from: ${{ inputs.no_cache != 'true' && format('type=registry,ref=docker.io/{0}:buildcache', inputs.image_name) || '' }}
         cache-to: ${{ inputs.push == 'true' && format('type=registry,ref=docker.io/{0}:buildcache,image-manifest=true', inputs.image_name) || '' }}
