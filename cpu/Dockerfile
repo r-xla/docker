@@ -33,6 +33,6 @@ RUN --mount=type=secret,id=github_pat \
     R -q -e "remotes::install_github('r-xla/anvil', ref = Sys.getenv('ANVIL_REF'), force = TRUE)"
 
 # Trigger PJRT plugin download
-RUN R -q -e "anvil::nv_tensor(1, device = 'cpu')"
+RUN R -q -e "anvil::nv_array(1, device = 'cpu')"
 
 CMD ["bash"]

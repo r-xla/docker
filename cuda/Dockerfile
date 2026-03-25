@@ -15,7 +15,7 @@ RUN --mount=type=secret,id=github_pat \
     R -q -e "remotes::install_github('r-xla/anvil', ref = Sys.getenv('ANVIL_REF'), force = TRUE)"
 
 # Download PJRT plugins
-# Can't use nv_tensor() here because it fails if no GPU is available
+# Can't use nv_array() here because it fails if no GPU is available
 RUN R -q -e "options(timeout = 600); pjrt:::plugin_path('cpu'); pjrt:::plugin_path('cuda')"
 
 CMD ["bash"]
