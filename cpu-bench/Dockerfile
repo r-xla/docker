@@ -10,7 +10,8 @@ RUN apt-get update \
 # --break-system-packages is needed because Ubuntu 24.04+ marks system Python as
 # externally managed (PEP 668). Safe here since this is a container.
 RUN pip3 install --no-cache-dir --break-system-packages \
-    torch --index-url https://download.pytorch.org/whl/cpu
+    torch --index-url https://download.pytorch.org/whl/cpu \
+    && pip3 install --no-cache-dir --break-system-packages gpytorch
 
 # Use pppm
 COPY .Rprofile /usr/local/lib/R/etc/Rprofile.site
