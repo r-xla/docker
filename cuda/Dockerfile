@@ -1,6 +1,12 @@
 # -------- Build on cuda-base image --------
 FROM sebffischer/anvil-cuda-base:latest
 
+# Re-apply Rprofile.site setup in case the base image is an older cache
+# that predates the cuda-base fix (PRs don't push a fresh cuda-base).
+COPY .Rprofile /etc/Rprofile.site
+ENV R_PROFILE=/etc/Rprofile.site
+RUN R -q -e 'stopifnot(grepl("packagemanager.posit.co", getOption("repos")[["CRAN"]]))'
+
 # -------- install R packages---------------------------
 RUN R -q -e "install.packages('remotes', force = TRUE)"
 
