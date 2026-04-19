@@ -41,7 +41,10 @@ RUN curl -Ls https://github.com/r-lib/rig/releases/download/latest/rig-linux-lat
 RUN Rscript -e "print(sessionInfo());"
 
 # ---------- R defaults: PPM + binaries-only ----------
-COPY .Rprofile /usr/local/lib/R/etc/Rprofile.site
+# rig installs R under /opt/R/<version>, so Rprofile.site must land in
+# $(R RHOME)/etc -- not /usr/local/lib/R/etc.
+COPY .Rprofile /tmp/Rprofile.site
+RUN cp /tmp/Rprofile.site "$(R RHOME)/etc/Rprofile.site" && rm /tmp/Rprofile.site
 
 # -------- install cuda12.8 R package --------
 RUN R -q -e "install.packages('cuda12.8', repos = 'https://mlverse.r-universe.dev')"
