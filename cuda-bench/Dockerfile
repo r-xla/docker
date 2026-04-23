@@ -1,4 +1,4 @@
-FROM sebffischer/anvil-cuda:latest
+FROM sebffischer/anvl-cuda:latest
 
 ENV DEBIAN_FRONTEND=noninteractive
 

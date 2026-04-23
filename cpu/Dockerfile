@@ -22,17 +22,17 @@ COPY .Rprofile /usr/local/lib/R/etc/Rprofile.site
 
 RUN R -q -e "install.packages('remotes', force = TRUE)"
 
-# Cache bust to always reinstall anvil
+# Cache bust to always reinstall anvl
 ARG CACHEBUST=1
-ARG ANVIL_REF=""
+ARG ANVL_REF=""
 
 # GITHUB_PAT is NOT part of the image
 RUN --mount=type=secret,id=github_pat \
     export GITHUB_PAT="$(cat /run/secrets/github_pat 2>/dev/null || true)" && \
-    ANVIL_REF="${ANVIL_REF:-HEAD}" \
-    R -q -e "remotes::install_github('r-xla/anvil', ref = Sys.getenv('ANVIL_REF'), force = TRUE)"
+    ANVL_REF="${ANVL_REF:-HEAD}" \
+    R -q -e "remotes::install_github('r-xla/anvl', ref = Sys.getenv('ANVL_REF'), force = TRUE)"
 
 # Trigger PJRT plugin download
-RUN R -q -e "anvil::nv_array(1, device = 'cpu')"
+RUN R -q -e "anvl::nv_array(1, device = 'cpu')"
 
 CMD ["bash"]
