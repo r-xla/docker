@@ -1,4 +1,4 @@
-FROM sebffischer/anvil-cpu:latest
+FROM sebffischer/anvl-cpu:latest
 
 ENV DEBIAN_FRONTEND=noninteractive
 

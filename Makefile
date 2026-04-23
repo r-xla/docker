@@ -1,10 +1,10 @@
 # Build variables (override with: make cpu TAG=mytag)
-CPU_IMAGE_NAME ?= anvil-cpu
-CUDA_BASE_IMAGE_NAME ?= anvil-cuda-base
-CUDA_IMAGE_NAME ?= anvil-cuda
-CPU_BENCH_IMAGE_NAME ?= anvil-cpu-bench
-CUDA_BENCH_IMAGE_NAME ?= anvil-cuda-bench
-CUDA_BENCH_12_4_IMAGE_NAME ?= anvil-cuda-bench-12.4
+CPU_IMAGE_NAME ?= anvl-cpu
+CUDA_BASE_IMAGE_NAME ?= anvl-cuda-base
+CUDA_IMAGE_NAME ?= anvl-cuda
+CPU_BENCH_IMAGE_NAME ?= anvl-cpu-bench
+CUDA_BENCH_IMAGE_NAME ?= anvl-cuda-bench
+CUDA_BENCH_12_4_IMAGE_NAME ?= anvl-cuda-bench-12.4
 TAG ?= latest
 PLATFORM ?= linux/amd64
 PROGRESS ?= plain
