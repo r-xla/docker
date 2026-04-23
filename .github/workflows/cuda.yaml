@@ -8,8 +8,8 @@ on:
         description: 'Whether to push the image'
         type: boolean
         default: false
-      anvil_ref:
-        description: 'Git ref for r-xla/anvil to install'
+      anvl_ref:
+        description: 'Git ref for r-xla/anvl to install'
         type: string
         default: ''
       tag:
@@ -36,14 +36,14 @@ jobs:
       - name: Build and push Docker image
         uses: ./.github/actions/docker-build
         with:
-          image_name: sebffischer/anvil-cuda
+          image_name: sebffischer/anvl-cuda
           dockerfile: ./cuda/Dockerfile
           push: ${{ inputs.push || (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main') }}
           dockerhub_username: ${{ secrets.DOCKERHUB_USERNAME }}
           dockerhub_token: ${{ secrets.DOCKERHUB_TOKEN }}
           ghcr_token: ${{ secrets.GITHUB_TOKEN }}
           github_pat: ${{ secrets.GITHUB_TOKEN }}
-          anvil_ref: ${{ inputs.anvil_ref }}
+          anvl_ref: ${{ inputs.anvl_ref }}
           extra_tags: |
-            docker.io/sebffischer/anvil-cuda:${{ inputs.tag || 'latest' }}
-            ghcr.io/${{ github.repository_owner }}/anvil-cuda:${{ inputs.tag || 'latest' }}
+            docker.io/sebffischer/anvl-cuda:${{ inputs.tag || 'latest' }}
+            ghcr.io/${{ github.repository_owner }}/anvl-cuda:${{ inputs.tag || 'latest' }}
