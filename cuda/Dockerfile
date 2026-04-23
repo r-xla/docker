@@ -9,9 +9,12 @@ ARG CACHEBUST=1
 ARG ANVL_REF=""
 
 # GITHUB_PAT is NOT part of the image
+# USE_BUNDLED_LIBUV: fs >= 2.1.0 no longer auto-falls back to its bundled libuv
+# when system libuv-dev is absent, so force the bundled build.
 RUN --mount=type=secret,id=github_pat \
     export GITHUB_PAT="$(cat /run/secrets/github_pat 2>/dev/null || true)" && \
     ANVL_REF="${ANVL_REF:-HEAD}" \
+    USE_BUNDLED_LIBUV=1 \
     R -q -e "remotes::install_github('r-xla/anvl', ref = Sys.getenv('ANVL_REF'), force = TRUE)"
 
 # Download PJRT plugins
