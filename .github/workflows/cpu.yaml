@@ -12,6 +12,10 @@ on:
     branches:
       - main
 
+env:
+  IMAGE_DOCKERHUB: docker.io/sebffischer/anvl-cpu
+  IMAGE_GHCR: ghcr.io/r-xla/anvl-cpu
+
 jobs:
   resolve-anvl-release:
     runs-on: ubuntu-latest
@@ -45,44 +49,150 @@ jobs:
           fi
 
   build-latest:
-    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: linux/amd64
+            runner: ubuntu-latest
+          - platform: linux/arm64
+            runner: ubuntu-24.04-arm
+    runs-on: ${{ matrix.runner }}
     permissions:
       contents: read
       packages: write
     steps:
       - uses: actions/checkout@v4
-      - uses: ./.github/actions/docker-build
+      - id: build
+        uses: ./.github/actions/docker-build-by-digest
         with:
-          image_name: sebffischer/anvl-cpu
+          image_name_dockerhub: ${{ env.IMAGE_DOCKERHUB }}
+          image_name_ghcr: ${{ env.IMAGE_GHCR }}
           dockerfile: ./cpu/Dockerfile
+          platform: ${{ matrix.platform }}
           push: ${{ github.event_name != 'pull_request' }}
           dockerhub_username: ${{ secrets.DOCKERHUB_USERNAME }}
           dockerhub_token: ${{ secrets.DOCKERHUB_TOKEN }}
           ghcr_token: ${{ secrets.GITHUB_TOKEN }}
           github_pat: ${{ secrets.GITHUB_TOKEN }}
-          extra_tags: |
-            docker.io/sebffischer/anvl-cpu:latest
-            ghcr.io/${{ github.repository_owner }}/anvl-cpu:latest
+      - name: Export digest
+        if: github.event_name != 'pull_request'
+        run: |
+          mkdir -p /tmp/digests
+          digest="${{ steps.build.outputs.digest }}"
+          touch "/tmp/digests/${digest#sha256:}"
+      - name: Compute platform pair
+        if: github.event_name != 'pull_request'
+        id: pair
+        run: |
+          platform="${{ matrix.platform }}"
+          echo "pair=${platform//\//-}" >> "$GITHUB_OUTPUT"
+      - name: Upload digest
+        if: github.event_name != 'pull_request'
+        uses: actions/upload-artifact@v4
+        with:
+          name: digests-latest-${{ steps.pair.outputs.pair }}
+          path: /tmp/digests/*
+          if-no-files-found: error
+          retention-days: 1
 
-  build-release:
-    needs: resolve-anvl-release
-    if: needs.resolve-anvl-release.outputs.changed == 'true'
+  merge-latest:
+    needs: build-latest
+    if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     permissions:
       contents: read
       packages: write
     steps:
       - uses: actions/checkout@v4
-      - uses: ./.github/actions/docker-build
+      - name: Download digests
+        uses: actions/download-artifact@v4
         with:
-          image_name: sebffischer/anvl-cpu
+          path: /tmp/digests
+          pattern: digests-latest-*
+          merge-multiple: true
+      - uses: ./.github/actions/docker-merge
+        with:
+          image_name_dockerhub: ${{ env.IMAGE_DOCKERHUB }}
+          image_name_ghcr: ${{ env.IMAGE_GHCR }}
+          tag: latest
+          digests_dir: /tmp/digests
+          dockerhub_username: ${{ secrets.DOCKERHUB_USERNAME }}
+          dockerhub_token: ${{ secrets.DOCKERHUB_TOKEN }}
+          ghcr_token: ${{ secrets.GITHUB_TOKEN }}
+
+  build-release:
+    needs: resolve-anvl-release
+    if: needs.resolve-anvl-release.outputs.changed == 'true'
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: linux/amd64
+            runner: ubuntu-latest
+          - platform: linux/arm64
+            runner: ubuntu-24.04-arm
+    runs-on: ${{ matrix.runner }}
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+      - id: build
+        uses: ./.github/actions/docker-build-by-digest
+        with:
+          image_name_dockerhub: ${{ env.IMAGE_DOCKERHUB }}
+          image_name_ghcr: ${{ env.IMAGE_GHCR }}
           dockerfile: ./cpu/Dockerfile
+          platform: ${{ matrix.platform }}
           push: ${{ github.event_name != 'pull_request' }}
           dockerhub_username: ${{ secrets.DOCKERHUB_USERNAME }}
           dockerhub_token: ${{ secrets.DOCKERHUB_TOKEN }}
           ghcr_token: ${{ secrets.GITHUB_TOKEN }}
           github_pat: ${{ secrets.GITHUB_TOKEN }}
           anvl_ref: ${{ needs.resolve-anvl-release.outputs.tag }}
-          extra_tags: |
-            docker.io/sebffischer/anvl-cpu:release
-            ghcr.io/${{ github.repository_owner }}/anvl-cpu:release
+      - name: Export digest
+        if: github.event_name != 'pull_request'
+        run: |
+          mkdir -p /tmp/digests
+          digest="${{ steps.build.outputs.digest }}"
+          touch "/tmp/digests/${digest#sha256:}"
+      - name: Compute platform pair
+        if: github.event_name != 'pull_request'
+        id: pair
+        run: |
+          platform="${{ matrix.platform }}"
+          echo "pair=${platform//\//-}" >> "$GITHUB_OUTPUT"
+      - name: Upload digest
+        if: github.event_name != 'pull_request'
+        uses: actions/upload-artifact@v4
+        with:
+          name: digests-release-${{ steps.pair.outputs.pair }}
+          path: /tmp/digests/*
+          if-no-files-found: error
+          retention-days: 1
+
+  merge-release:
+    needs: build-release
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download digests
+        uses: actions/download-artifact@v4
+        with:
+          path: /tmp/digests
+          pattern: digests-release-*
+          merge-multiple: true
+      - uses: ./.github/actions/docker-merge
+        with:
+          image_name_dockerhub: ${{ env.IMAGE_DOCKERHUB }}
+          image_name_ghcr: ${{ env.IMAGE_GHCR }}
+          tag: release
+          digests_dir: /tmp/digests
+          dockerhub_username: ${{ secrets.DOCKERHUB_USERNAME }}
+          dockerhub_token: ${{ secrets.DOCKERHUB_TOKEN }}
+          ghcr_token: ${{ secrets.GITHUB_TOKEN }}

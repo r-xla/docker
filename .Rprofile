@@ -20,4 +20,4 @@ options(
   )
 )
 
-.libPaths(sprintf("/root/R/x86_64-pc-linux-gnu-library/%s.%s", R.version$major, R.version$minor))
+.libPaths(sprintf("/root/R/%s-library/%s.%s", R.version$platform, R.version$major, R.version$minor))
