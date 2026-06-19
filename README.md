@@ -59,3 +59,36 @@ make <target>
 ```
 
 Available targets: `cpu`, `cuda-base`, `cuda`, `cpu-bench`, `cuda-bench`
+
+## Pushing Images to the GitHub Container Registry
+
+CI pushes the `anvl-cpu`, `anvl-cuda-base`, and `anvl-cuda` images to GHCR
+automatically (using the built-in `GITHUB_TOKEN`). To push a locally built image
+manually, follow these steps.
+
+1. Create a [personal access token (classic)](https://github.com/settings/tokens)
+   with the `write:packages` scope.
+
+2. Log in to GHCR (`$CR_PAT` holds the token from step 1):
+
+   ```bash
+   echo "$CR_PAT" | docker login ghcr.io -u <github-username> --password-stdin
+   ```
+
+3. Tag the local image with its `ghcr.io/r-xla/...` name. For example, after
+   `make cuda` (which builds `anvl-cuda:latest`):
+
+   ```bash
+   docker tag anvl-cuda:latest ghcr.io/r-xla/anvl-cuda:latest
+   ```
+
+4. Push it:
+
+   ```bash
+   docker push ghcr.io/r-xla/anvl-cuda:latest
+   ```
+
+The first push of a new image creates a private package under the
+[r-xla organization](https://github.com/orgs/r-xla/packages). Set its visibility
+to public in the package settings so that `docker pull` works without
+authentication.
