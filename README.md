@@ -62,7 +62,7 @@ make cuda-base    # builds anvl-cuda-base:latest
 make cuda         # builds anvl-cuda:latest (build cuda-base first)
 ```
 
-Available targets: `cpu`, `cuda-base`, `cuda`, `cpu-bench`, `cuda-bench`, `cuda-bench-12.4`.
+Available targets: `cpu`, `cuda-base`, `cuda`, `cpu-bench`, `cuda-bench`.
 
 The build is parameterised through `make` variables that you can override on the
 command line:
@@ -76,8 +76,7 @@ command line:
 | `PROGRESS` | `plain` | Passed to `docker build --progress`. |
 
 The per-target image-name variables are `CPU_IMAGE_NAME`, `CUDA_BASE_IMAGE_NAME`,
-`CUDA_IMAGE_NAME`, `CPU_BENCH_IMAGE_NAME`, `CUDA_BENCH_IMAGE_NAME`, and
-`CUDA_BENCH_12_4_IMAGE_NAME`.
+`CUDA_IMAGE_NAME`, `CPU_BENCH_IMAGE_NAME`, and `CUDA_BENCH_IMAGE_NAME`.
 
 For example, to build the CPU image with a custom tag, or already named for the
 GitHub Container Registry:
