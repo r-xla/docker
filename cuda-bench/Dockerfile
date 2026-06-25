@@ -12,6 +12,9 @@ RUN apt-get update \
 RUN pip3 install --no-cache-dir --break-system-packages \
     torch --index-url https://download.pytorch.org/whl/cu124
 
+# Install JAX with CUDA 12 support (bundles the required CUDA libraries)
+RUN pip3 install --no-cache-dir --break-system-packages -U "jax[cuda12]"
+
 # Use pppm
 COPY .Rprofile /usr/local/lib/R/etc/Rprofile.site
 
