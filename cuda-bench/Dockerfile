@@ -18,7 +18,7 @@ RUN pip3 install --no-cache-dir --break-system-packages -U "jax[cuda12]"
 # Use pppm
 COPY .Rprofile /usr/local/lib/R/etc/Rprofile.site
 
-RUN R -q -e "install.packages(c('torch', 'data.table', 'batchtools', 'mirai', 'bench', 'here', 'reticulate'), force = TRUE)"
+RUN R -q -e "install.packages(c('torch', 'data.table', 'batchtools', 'mirai', 'bench', 'here', 'reticulate', 'rstan'), force = TRUE)"
 
 RUN R -q -e "torch::install_torch()"
 
