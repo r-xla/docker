@@ -1,7 +1,7 @@
 # -------- CUDA-capable base image --------
-# CUDA toolkit libraries are provided by the cuda12.8 R package at runtime.
+# CUDA toolkit libraries are provided by the pjrt.cuda R package at runtime.
 # We only need the base image with driver libs (same as pjrt CI).
-FROM nvidia/cuda:12.8.1-base-ubuntu24.04
+FROM nvidia/cuda:13.3.1-base-ubuntu24.04
 
 ENV DEBIAN_FRONTEND=noninteractive
 
@@ -28,6 +28,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     locales \
     wget \
     qpdf \
+    unzip \
   && locale-gen en_US.UTF-8 \
   && update-locale LANG=en_US.UTF-8 \
   && rm -rf /var/lib/apt/lists/*
@@ -50,7 +51,8 @@ ENV R_PROFILE=/etc/Rprofile.site
 # the active repo, which would silently regress to source installs).
 RUN R -q -e 'stopifnot(grepl("packagemanager.posit.co", getOption("repos")[["CRAN"]]))'
 
-# -------- install cuda12.8 R package --------
-RUN R -q -e "install.packages('cuda12.8', repos = 'https://mlverse.r-universe.dev')"
+# -------- install pjrt.cuda R package --------
+# Its configure script downloads the CUDA components from PyPI (needs unzip).
+RUN R -q -e "install.packages('pjrt.cuda', repos = 'https://r-xla.r-universe.dev')"
 
 CMD ["bash"]
