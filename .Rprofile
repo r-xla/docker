@@ -15,7 +15,10 @@ options(
     )
   ),
   download.file.method = "libcurl",
+  # pjrt, stablehlo and xlamisc are not on CRAN, so anvl's dependencies
+  # resolve from the r-xla r-universe.
   repos = c(
+    rxla = "https://r-xla.r-universe.dev",
     CRAN = "https://packagemanager.posit.co/cran/__linux__/noble/latest"
   )
 )
