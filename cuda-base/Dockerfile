@@ -47,6 +47,11 @@ RUN Rscript -e "print(sessionInfo());"
 COPY .Rprofile /etc/Rprofile.site
 ENV R_PROFILE=/etc/Rprofile.site
 
+# rig creates and prepends a user library under /root/R, which would put
+# packages installed during the build out of reach of non-root users. Disable it
+# so they go into the system library; R_LIBS still takes precedence.
+ENV R_LIBS_USER=NULL
+
 # Sanity-check that Rprofile.site actually loads (fails build if PPM is not
 # the active repo, which would silently regress to source installs).
 RUN R -q -e 'stopifnot(grepl("packagemanager.posit.co", getOption("repos")[["CRAN"]]))'
