@@ -56,8 +56,11 @@ ENV R_LIBS_USER=NULL
 # the active repo, which would silently regress to source installs).
 RUN R -q -e 'stopifnot(grepl("packagemanager.posit.co", getOption("repos")[["CRAN"]]))'
 
-# -------- install pjrt.cuda R package --------
-# Its configure script downloads the CUDA components from PyPI (needs unzip).
+# -------- install pjrt.cuda R package and its CUDA components --------
+# The CUDA components are downloaded from PyPI. pjrt.cuda stores them in its
+# installation directory in the system library, where every user of the image
+# finds them.
 RUN R -q -e "install.packages('pjrt.cuda', repos = 'https://r-xla.r-universe.dev')"
+RUN R -q -e "pjrt.cuda::install_cuda()"
 
 CMD ["bash"]
