@@ -52,6 +52,9 @@ ENV R_PROFILE=/etc/Rprofile.site
 # rig creates and prepends a user library under /root/R, which would put
 # packages installed during the build out of reach of non-root users. Disable it
 # so they go into the system library; R_LIBS still takes precedence.
+# `docker run` defaults to root, but GPU clusters typically run the image as the
+# calling user (Enroot, Apptainer/Singularity), as do `docker run --user` and
+# Kubernetes pods with runAsNonRoot.
 ENV R_LIBS_USER=NULL
 
 # Sanity-check that Rprofile.site actually loads (fails build if PPM is not
