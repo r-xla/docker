@@ -32,8 +32,10 @@ RUN --mount=type=secret,id=github_pat \
     ANVL_REF="${ANVL_REF:-HEAD}" \
     R -q -e "remotes::install_github('r-xla/anvl', ref = Sys.getenv('ANVL_REF'), force = TRUE)"
 
-# Trigger PJRT plugin download. PJRT_INSTALL=1 allows the download in this
-# non-interactive build (pjrt otherwise only downloads when asked interactively).
-RUN PJRT_INSTALL=1 R -q -e "anvl::nv_array(1, device = 'cpu')"
+# Download the PJRT plugin. pjrt stores it in its installation directory in the
+# site library, where every user of the image finds it.
+RUN R -q -e "pjrt::install_pjrt(cuda = FALSE)"
+
+RUN R -q -e "anvl::nv_array(1, device = 'cpu')"
 
 CMD ["bash"]

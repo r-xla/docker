@@ -1,7 +1,9 @@
 # -------- CUDA-capable base image --------
 # CUDA toolkit libraries are provided by the pjrt.cuda R package at runtime.
 # We only need the base image with driver libs (same as pjrt CI).
-FROM nvidia/cuda:13.3.1-base-ubuntu24.04
+# Keep the Ubuntu release in step with rocker/r-ver:latest, the base of the CPU
+# image.
+FROM nvidia/cuda:13.3.1-base-ubuntu26.04
 
 ENV DEBIAN_FRONTEND=noninteractive
 
@@ -20,7 +22,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     protobuf-compiler \
     libicu-dev \
     sudo \
-    software-properties-common \
     dialog \
     apt-utils \
     tzdata \
@@ -34,10 +35,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
   && rm -rf /var/lib/apt/lists/*
 
 # -------- install R using rig ----------------------------------
+# Install the current R release, as rocker/r-ver:latest does for the CPU image.
 RUN curl -Ls https://github.com/r-lib/rig/releases/download/latest/rig-linux-latest.tar.gz | \
     tar xz -C /usr/local && \
-    rig add 4.4.2 && \
-    rig default 4.4.2
+    rig add release && \
+    rig default release
 
 RUN Rscript -e "print(sessionInfo());"
 
@@ -47,12 +49,23 @@ RUN Rscript -e "print(sessionInfo());"
 COPY .Rprofile /etc/Rprofile.site
 ENV R_PROFILE=/etc/Rprofile.site
 
+# rig creates and prepends a user library under /root/R, which would put
+# packages installed during the build out of reach of non-root users. Disable it
+# so they go into the system library; R_LIBS still takes precedence.
+# `docker run` defaults to root, but GPU clusters typically run the image as the
+# calling user (Enroot, Apptainer/Singularity), as do `docker run --user` and
+# Kubernetes pods with runAsNonRoot.
+ENV R_LIBS_USER=NULL
+
 # Sanity-check that Rprofile.site actually loads (fails build if PPM is not
 # the active repo, which would silently regress to source installs).
 RUN R -q -e 'stopifnot(grepl("packagemanager.posit.co", getOption("repos")[["CRAN"]]))'
 
-# -------- install pjrt.cuda R package --------
-# Its configure script downloads the CUDA components from PyPI (needs unzip).
+# -------- install pjrt.cuda R package and its CUDA components --------
+# The CUDA components are downloaded from PyPI. pjrt.cuda stores them in its
+# installation directory in the system library, where every user of the image
+# finds them.
 RUN R -q -e "install.packages('pjrt.cuda', repos = 'https://r-xla.r-universe.dev')"
+RUN R -q -e "pjrt.cuda::install_cuda()"
 
 CMD ["bash"]

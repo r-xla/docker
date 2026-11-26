@@ -17,10 +17,10 @@ RUN --mount=type=secret,id=github_pat \
     USE_BUNDLED_LIBUV=1 \
     R -q -e "remotes::install_github('r-xla/anvl', ref = Sys.getenv('ANVL_REF'), force = TRUE)"
 
-# Download PJRT plugins
-# Can't use nv_array() here because it fails if no GPU is available.
-# PJRT_INSTALL=1 allows the download in this non-interactive build (pjrt
-# otherwise only downloads when asked interactively).
-RUN PJRT_INSTALL=1 R -q -e "options(timeout = 600); pjrt:::plugin_path('cpu'); pjrt:::plugin_path('cuda')"
+# Download the PJRT plugins. pjrt stores them in its installation directory in
+# the system library, where every user of the image finds them. Also check that
+# the CUDA components installed in the base image are still in place (loading
+# the CUDA plugin needs a GPU, so it can't be tested here).
+RUN R -q -e "pjrt::install_pjrt(cuda = TRUE); stopifnot(pjrt.cuda::cuda_installed())"
 
 CMD ["bash"]
