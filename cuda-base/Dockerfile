@@ -1,7 +1,9 @@
 # -------- CUDA-capable base image --------
 # CUDA toolkit libraries are provided by the pjrt.cuda R package at runtime.
 # We only need the base image with driver libs (same as pjrt CI).
-FROM nvidia/cuda:13.3.1-base-ubuntu24.04
+# Keep the Ubuntu release in step with rocker/r-ver:latest, the base of the CPU
+# image.
+FROM nvidia/cuda:13.3.1-base-ubuntu26.04
 
 ENV DEBIAN_FRONTEND=noninteractive
 
@@ -20,7 +22,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     protobuf-compiler \
     libicu-dev \
     sudo \
-    software-properties-common \
     dialog \
     apt-utils \
     tzdata \
@@ -34,10 +35,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
   && rm -rf /var/lib/apt/lists/*
 
 # -------- install R using rig ----------------------------------
+# Install the current R release, as rocker/r-ver:latest does for the CPU image.
 RUN curl -Ls https://github.com/r-lib/rig/releases/download/latest/rig-linux-latest.tar.gz | \
     tar xz -C /usr/local && \
-    rig add 4.4.2 && \
-    rig default 4.4.2
+    rig add release && \
+    rig default release
 
 RUN Rscript -e "print(sessionInfo());"
 

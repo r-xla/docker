@@ -13,7 +13,8 @@ These images are built daily and pushed to [Docker Hub](https://hub.docker.com/u
 | `anvl-cuda-base` | Base image with CUDA 13.3.1 and all {anvl} system dependencies |
 | `anvl-cuda` | `anvl-cuda-base` with {anvl} installed |
 
-All images come with R installed.
+All images come with the current R release, and the CPU and CUDA images share
+the same Ubuntu release.
 
 Each image is available with two tags:
 
