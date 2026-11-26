@@ -17,6 +17,15 @@ RUN --mount=type=secret,id=github_pat \
     USE_BUNDLED_LIBUV=1 \
     R -q -e "remotes::install_github('r-xla/anvl', ref = Sys.getenv('ANVL_REF'), force = TRUE)"
 
+# Until the next pjrt release, the latest image (anvl main) uses pjrt's develop
+# branch, whose install_pjrt() stores the plugins in the package directory.
+# Release images keep the pjrt their anvl release depends on.
+RUN --mount=type=secret,id=github_pat \
+    export GITHUB_PAT="$(cat /run/secrets/github_pat 2>/dev/null || true)" && \
+    if [ -z "$ANVL_REF" ]; then \
+      R -q -e "remotes::install_github('r-xla/pjrt', ref = 'develop')"; \
+    fi
+
 # Download the PJRT plugins. pjrt stores them in its installation directory in
 # the system library, where every user of the image finds them. Also check that
 # the CUDA components installed in the base image are still in place (loading

@@ -32,6 +32,15 @@ RUN --mount=type=secret,id=github_pat \
     ANVL_REF="${ANVL_REF:-HEAD}" \
     R -q -e "remotes::install_github('r-xla/anvl', ref = Sys.getenv('ANVL_REF'), force = TRUE)"
 
+# Until the next pjrt release, the latest image (anvl main) uses pjrt's develop
+# branch, whose install_pjrt() stores the plugin in the package directory.
+# Release images keep the pjrt their anvl release depends on.
+RUN --mount=type=secret,id=github_pat \
+    export GITHUB_PAT="$(cat /run/secrets/github_pat 2>/dev/null || true)" && \
+    if [ -z "$ANVL_REF" ]; then \
+      R -q -e "remotes::install_github('r-xla/pjrt', ref = 'develop')"; \
+    fi
+
 # Download the PJRT plugin. pjrt stores it in its installation directory in the
 # site library, where every user of the image finds it.
 RUN R -q -e "pjrt::install_pjrt(cuda = FALSE)"
